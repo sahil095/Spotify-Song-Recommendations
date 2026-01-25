@@ -33,7 +33,7 @@ NUMERICAL_FEATURES = [
     'speechiness', 'acousticness', 'liveness'
 ]
 
-CATEGORICAL_FEATURES = ['mode']
+CATEGORICAL_FEATURES = []
 
 ID_COLUMNS = ['track_name', 'artist_name(s)']
 
