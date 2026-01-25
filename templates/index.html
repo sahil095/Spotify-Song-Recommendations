@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendation System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Music Recommendation System</h1>
+            <p class="subtitle">Discover similar songs based on audio features</p>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <form id="recommendationForm">
+                    <div class="input-group">
+                        <label for="songInput">Enter a song name:</label>
+                        <input 
+                            type="text" 
+                            id="songInput" 
+                            name="song" 
+                            placeholder="e.g., I Know You Want Me (Calle Ocho)"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+                    <div class="input-group">
+                        <label for="kInput">Number of recommendations:</label>
+                        <input 
+                            type="number" 
+                            id="kInput" 
+                            name="k" 
+                            value="10" 
+                            min="1" 
+                            max="20"
+                        >
+                    </div>
+                    <button type="submit" id="submitBtn">
+                        <span class="btn-text">Get Recommendations</span>
+                        <span class="btn-loader" style="display: none;">⏳ Loading...</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div id="resultsSection" style="display: none;">
+                <div class="input-song-section">
+                    <h2>Input Song</h2>
+                    <div id="inputSongInfo" class="song-card"></div>
+                </div>
+
+                <div class="recommendations-section">
+                    <h2>Recommended Songs</h2>
+                    <div id="recommendationsList" class="recommendations-grid"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by FastAPI & Machine Learning</p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('recommendationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsSection = document.getElementById('resultsSection');
+        const inputSongInfo = document.getElementById('inputSongInfo');
+        const recommendationsList = document.getElementById('recommendationsList');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const song = document.getElementById('songInput').value.trim();
+            const k = parseInt(document.getElementById('kInput').value) || 10;
+
+            if (!song) {
+                showError('Please enter a song name');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline';
+            errorMessage.style.display = 'none';
+            resultsSection.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ song, k })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'An error occurred');
+                }
+
+                // Display results
+                displayResults(data);
+
+            } catch (error) {
+                showError(error.message || 'Failed to get recommendations. Please try again.');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        });
+
+        function displayResults(data) {
+            // Display input song
+            const inputSong = data.input_song;
+            inputSongInfo.innerHTML = `
+                <div class="song-info">
+                    <h3>${inputSong['track_name'] || 'Unknown'}</h3>
+                    <p class="artist">${inputSong['artist_name(s)'] || 'Unknown Artist'}</p>
+                </div>
+            `;
+
+            // Display recommendations
+            recommendationsList.innerHTML = '';
+            data.recommendations.forEach((rec, index) => {
+                const card = document.createElement('div');
+                card.className = 'recommendation-card';
+                card.innerHTML = `
+                    <div class="rank-badge">#${index + 1}</div>
+                    <div class="song-details">
+                        <h3>${rec.track_name}</h3>
+                        <p class="artist">${rec.artist_name}</p>
+                        <div class="metadata">
+                            <span class="popularity">Popularity: ${rec.popularity}</span>
+                            <span class="similarity">Similarity: ${(rec.similarity * 100).toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+                recommendationsList.appendChild(card);
+            });
+
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
