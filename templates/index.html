@@ -124,10 +124,14 @@
         function displayResults(data) {
             // Display input song
             const inputSong = data.input_song;
+            const inputImage = inputSong['image_url'] || '';
             inputSongInfo.innerHTML = `
-                <div class="song-info">
-                    <h3>${inputSong['track_name'] || 'Unknown'}</h3>
-                    <p class="artist">${inputSong['artist_name(s)'] || 'Unknown Artist'}</p>
+                <div class="input-song-content">
+                    ${inputImage ? `<img src="${inputImage}" alt="Album cover" class="song-image" onerror="this.style.display='none'">` : '<div class="song-image-placeholder">🎵</div>'}
+                    <div class="song-info">
+                        <h3>${inputSong['track_name'] || 'Unknown'}</h3>
+                        <p class="artist">${inputSong['artist_name(s)'] || 'Unknown Artist'}</p>
+                    </div>
                 </div>
             `;
 
@@ -136,14 +140,16 @@
             data.recommendations.forEach((rec, index) => {
                 const card = document.createElement('div');
                 card.className = 'recommendation-card';
+                const imageUrl = rec.image_url || '';
                 card.innerHTML = `
                     <div class="rank-badge">#${index + 1}</div>
+                    ${imageUrl ? `<img src="${imageUrl}" alt="Album cover" class="card-image" onerror="this.style.display='none'">` : '<div class="card-image-placeholder">🎵</div>'}
                     <div class="song-details">
                         <h3>${rec.track_name}</h3>
                         <p class="artist">${rec.artist_name}</p>
                         <div class="metadata">
-                            <span class="popularity">Popularity: ${rec.popularity}</span>
-                            <span class="similarity">Similarity: ${(rec.similarity * 100).toFixed(1)}%</span>
+                            <span class="popularity">⭐ ${rec.popularity}</span>
+                            <span class="similarity">${(rec.similarity * 100).toFixed(1)}% match</span>
                         </div>
                     </div>
                 `;

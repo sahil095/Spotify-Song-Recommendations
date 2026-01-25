@@ -44,8 +44,14 @@ class RecommendationEngine:
         print(f"Available numerical features: {available_numerical}")
         print(f"Available categorical features: {available_categorical}")
         
+        # Include image URL columns if available (for display purposes, not for ML)
+        image_cols = []
+        for col in ['track_preview_url', 'album_image_url']:
+            if col in df_clean.columns:
+                image_cols.append(col)
+        
         # Create model dataframe
-        self.model_df = df_clean[available_id_cols + available_numerical + available_categorical].copy()
+        self.model_df = df_clean[available_id_cols + available_numerical + available_categorical + image_cols].copy()
         
         # Fill missing values
         for c in available_numerical:
@@ -208,6 +214,20 @@ class RecommendationEngine:
                 elif col == 'artist_name(s)':
                     input_artist_name = value
         
+        # Get input song image URL
+        input_preview_url = None
+        if 'track_preview_url' in self.model_df.columns:
+            input_preview_url = self.model_df.loc[idx, 'track_preview_url']
+            if pd.isna(input_preview_url) or input_preview_url == '' or str(input_preview_url).lower() == 'nan':
+                input_preview_url = None
+        
+        if not input_preview_url and 'album_image_url' in self.model_df.columns:
+            album_img = self.model_df.loc[idx, 'album_image_url']
+            if not (pd.isna(album_img) or album_img == '' or str(album_img).lower() == 'nan'):
+                input_preview_url = album_img
+        
+        input_song_info['image_url'] = input_preview_url or None
+        
         # Query neighbors - request k+1 to account for the input song itself
         # The first result is always the query point itself (distance = 0)
         query_X = self.model_df.loc[[idx], self.numerical_features + self.categorical_features]
@@ -243,11 +263,25 @@ class RecommendationEngine:
             if is_same_song:
                 continue
             
+            # Get preview URL or fallback to album image
+            preview_url = None
+            if 'track_preview_url' in self.model_df.columns:
+                preview_url = self.model_df.loc[neighbor_idx, 'track_preview_url']
+                if pd.isna(preview_url) or preview_url == '' or str(preview_url).lower() == 'nan':
+                    preview_url = None
+            
+            # Fallback to album image if preview URL is not available
+            if not preview_url and 'album_image_url' in self.model_df.columns:
+                album_img = self.model_df.loc[neighbor_idx, 'album_image_url']
+                if not (pd.isna(album_img) or album_img == '' or str(album_img).lower() == 'nan'):
+                    preview_url = album_img
+            
             result = {
                 'track_name': neighbor_track_name or 'Unknown',
                 'artist_name': neighbor_artist_name or 'Unknown',
                 'popularity': int(self.model_df.loc[neighbor_idx, 'popularity']) if 'popularity' in self.model_df.columns else 0,
-                'similarity': float(1 - distances[i])
+                'similarity': float(1 - distances[i]),
+                'image_url': preview_url or None
             }
             results.append(result)
             
@@ -256,7 +290,6 @@ class RecommendationEngine:
 
         temp = pd.DataFrame(results)
         temp = temp.sort_values(['similarity', 'popularity'], ascending=[False, False])
-        print(temp)
         results = temp.to_dict(orient='records')
         return {
             'input_song': input_song_info,
