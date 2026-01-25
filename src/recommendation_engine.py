@@ -215,7 +215,7 @@ class RecommendationEngine:
             self.pipe.named_steps['preprocess'].transform(query_X),
             n_neighbors=min(k + 1, len(self.model_df))
         )
-        
+
         distances = distances.ravel()
         indices = indices.ravel()
         
@@ -227,13 +227,12 @@ class RecommendationEngine:
         results = []
         for i, neighbor_idx in enumerate(neighbor_df_indices):
             # Always skip the first result (index 0) as it's the query point itself
-            # if i == 0:
-            #     continue
+            if i == 0:
+                continue
             
-            print(i, neighbor_idx)
             neighbor_track_name = str(self.model_df.loc[neighbor_idx, 'track_name']) if 'track_name' in self.model_df.columns else None
             neighbor_artist_name = str(self.model_df.loc[neighbor_idx, 'artist_name(s)']) if 'artist_name(s)' in self.model_df.columns else None
-            print(neighbor_track_name, neighbor_artist_name)
+            
             # Additional safety check: skip if it's the same song (by index or track_name)
             is_same_song = (
                 neighbor_idx == idx or  # Same DataFrame index
@@ -254,7 +253,11 @@ class RecommendationEngine:
             
             if len(results) >= k:
                 break
-        
+
+        temp = pd.DataFrame(results)
+        temp = temp.sort_values(['similarity', 'popularity'], ascending=[False, False])
+        print(temp)
+        results = temp.to_dict(orient='records')
         return {
             'input_song': input_song_info,
             'recommendations': results
