@@ -203,26 +203,39 @@ button[type="submit"]:disabled {
     padding: 25px;
 }
 
-.song-image {
+.song-image-container {
     width: 120px;
     height: 120px;
-    border-radius: 8px;
-    object-fit: cover;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     flex-shrink: 0;
-}
-
-.song-image-placeholder {
-    width: 120px;
-    height: 120px;
     border-radius: 8px;
+    overflow: hidden;
     background: var(--spotify-black);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3em;
-    flex-shrink: 0;
-    border: 2px solid var(--spotify-border);
+}
+
+.song-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.disc-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--spotify-black);
+}
+
+.disc-placeholder svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100px;
+    max-height: 100px;
 }
 
 .song-info h3 {
@@ -262,22 +275,32 @@ button[type="submit"]:disabled {
     background: #1f1f1f;
 }
 
-.card-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    display: block;
-}
-
-.card-image-placeholder {
+.card-image-container {
     width: 100%;
     height: 200px;
     background: var(--spotify-black);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 4em;
+    overflow: hidden;
     border-bottom: 1px solid var(--spotify-border);
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-image-container .disc-placeholder {
+    width: 100%;
+    height: 100%;
+}
+
+.card-image-container .disc-placeholder svg {
+    max-width: 150px;
+    max-height: 150px;
 }
 
 .rank-badge {
@@ -382,8 +405,7 @@ footer {
         text-align: center;
     }
 
-    .song-image,
-    .song-image-placeholder {
+    .song-image-container {
         width: 150px;
         height: 150px;
     }

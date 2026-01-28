@@ -127,7 +127,9 @@
             const inputImage = inputSong['image_url'] || '';
             inputSongInfo.innerHTML = `
                 <div class="input-song-content">
-                    ${inputImage ? `<img src="${inputImage}" alt="Album cover" class="song-image" onerror="this.style.display='none'">` : '<div class="song-image-placeholder">🎵</div>'}
+                    <div class="song-image-container">
+                        ${inputImage ? `<img src="${inputImage}" alt="Album cover" class="song-image" onerror="handleImageError(this)">` : getDiscPlaceholder()}
+                    </div>
                     <div class="song-info">
                         <h3>${inputSong['track_name'] || 'Unknown'}</h3>
                         <p class="artist">${inputSong['artist_name(s)'] || 'Unknown Artist'}</p>
@@ -143,7 +145,9 @@
                 const imageUrl = rec.image_url || '';
                 card.innerHTML = `
                     <div class="rank-badge">#${index + 1}</div>
-                    ${imageUrl ? `<img src="${imageUrl}" alt="Album cover" class="card-image" onerror="this.style.display='none'">` : '<div class="card-image-placeholder">🎵</div>'}
+                    <div class="card-image-container">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="Album cover" class="card-image" onerror="handleImageError(this)">` : getDiscPlaceholder()}
+                    </div>
                     <div class="song-details">
                         <h3>${rec.track_name}</h3>
                         <p class="artist">${rec.artist_name}</p>
@@ -158,6 +162,34 @@
 
             resultsSection.style.display = 'block';
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function handleImageError(img) {
+            // Replace failed image with disc placeholder
+            const container = img.parentElement;
+            container.innerHTML = getDiscPlaceholder();
+        }
+
+        function getDiscPlaceholder() {
+            return `
+                <div class="disc-placeholder">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Outer ring -->
+                        <circle cx="100" cy="100" r="90" fill="#2a2a2a" stroke="#1DB954" stroke-width="2"/>
+                        <!-- Inner rings -->
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="#333" stroke-width="1"/>
+                        <circle cx="100" cy="100" r="50" fill="none" stroke="#333" stroke-width="1"/>
+                        <circle cx="100" cy="100" r="30" fill="none" stroke="#333" stroke-width="1"/>
+                        <!-- Center hole -->
+                        <circle cx="100" cy="100" r="8" fill="#191414"/>
+                        <!-- Groove lines -->
+                        <line x1="100" y1="20" x2="100" y2="30" stroke="#1DB954" stroke-width="1"/>
+                        <line x1="100" y1="170" x2="100" y2="180" stroke="#1DB954" stroke-width="1"/>
+                        <line x1="20" y1="100" x2="30" y2="100" stroke="#1DB954" stroke-width="1"/>
+                        <line x1="170" y1="100" x2="180" y2="100" stroke="#1DB954" stroke-width="1"/>
+                    </svg>
+                </div>
+            `;
         }
 
         function showError(message) {

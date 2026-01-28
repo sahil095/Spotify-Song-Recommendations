@@ -220,11 +220,19 @@ class RecommendationEngine:
             input_preview_url = self.model_df.loc[idx, 'track_preview_url']
             if pd.isna(input_preview_url) or input_preview_url == '' or str(input_preview_url).lower() == 'nan':
                 input_preview_url = None
+            else:
+                # Check if it's a valid image URL
+                input_preview_str = str(input_preview_url).lower()
+                if not any(ext in input_preview_str for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', 'image']):
+                    input_preview_url = None
         
         if not input_preview_url and 'album_image_url' in self.model_df.columns:
             album_img = self.model_df.loc[idx, 'album_image_url']
             if not (pd.isna(album_img) or album_img == '' or str(album_img).lower() == 'nan'):
-                input_preview_url = album_img
+                # Check if it's a valid image URL
+                album_img_str = str(album_img).lower()
+                if any(ext in album_img_str for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', 'image']):
+                    input_preview_url = album_img
         
         input_song_info['image_url'] = input_preview_url or None
         
@@ -264,17 +272,26 @@ class RecommendationEngine:
                 continue
             
             # Get preview URL or fallback to album image
+            # Validate that URL is actually an image URL
             preview_url = None
             if 'track_preview_url' in self.model_df.columns:
                 preview_url = self.model_df.loc[neighbor_idx, 'track_preview_url']
                 if pd.isna(preview_url) or preview_url == '' or str(preview_url).lower() == 'nan':
                     preview_url = None
+                else:
+                    # Check if it's a valid image URL
+                    preview_url_str = str(preview_url).lower()
+                    if not any(ext in preview_url_str for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', 'image']):
+                        preview_url = None
             
             # Fallback to album image if preview URL is not available
             if not preview_url and 'album_image_url' in self.model_df.columns:
                 album_img = self.model_df.loc[neighbor_idx, 'album_image_url']
                 if not (pd.isna(album_img) or album_img == '' or str(album_img).lower() == 'nan'):
-                    preview_url = album_img
+                    # Check if it's a valid image URL
+                    album_img_str = str(album_img).lower()
+                    if any(ext in album_img_str for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', 'image']):
+                        preview_url = album_img
             
             result = {
                 'track_name': neighbor_track_name or 'Unknown',
