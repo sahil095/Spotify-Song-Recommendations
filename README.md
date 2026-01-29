@@ -2,6 +2,8 @@
 
 A web-based music recommendation system that uses machine learning to suggest similar songs based on audio features. Built with FastAPI backend and a simple HTML/CSS frontend.
 
+![Web App Screenshot](static/imgs/Screenshot%20(119).png)
+
 ## Features
 
 - 🎵 **Content-Based Recommendations**: Uses audio features (danceability, energy, tempo, etc.) to find similar songs
@@ -126,6 +128,14 @@ Response:
   "model_loaded": true
 }
 ```
+
+### Screenshots
+
+![Web Interface - Home](static/imgs/Screenshot%20(120).png)
+
+![Web Interface - Results](static/imgs/Screenshot%20(121).png)
+
+![Web Interface - More Results](static/imgs/Screenshot%20(122).png)
 
 ## Configuration
 
